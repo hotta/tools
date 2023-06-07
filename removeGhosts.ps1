@@ -33,6 +33,9 @@ listGhostDevicesOnly will output a table of all 'ghost' devices found in this sy
 .PARAMETER force
 If specified, each matching device will be removed WITHOUT any confirmation!
 
+.PARAMETER regardlessOfInstallState
+If specified, each matching device will be removed regardless of InstallState!
+
 .EXAMPLE
 Lists all devices
 . "removeGhosts.ps1" -listDevicesOnly
@@ -92,7 +95,8 @@ Param(
   [array]$NarrowByFriendlyName,
   [switch]$listDevicesOnly,
   [switch]$listGhostDevicesOnly,
-  [switch]$Force
+  [switch]$Force,
+  [switch]$regardlessOfInstallState
 )
 
 #parameter futzing
@@ -125,6 +129,10 @@ if ($listGhostDevicesOnly -eq $true) {
 
 if ($Force -eq $true) {
     write-host "Each removal will happen without any confirmation: $Force"
+}
+
+if ($regardlessOfInstallState -eq $true) {
+    write-host "Each removal will happen regardless of its InstallState: $regardlessOfInstallState"
 }
 
 function Filter-Device {
@@ -430,7 +438,7 @@ Add-Type -TypeDefinition $setupapi
             #we want to remove devices so let's check the filters...
             $matchFilter = Filter-Device -Dev $device
 
-            if ($InstallState -eq $False) {
+            if ($InstallState -eq $False -or $regardlessOfInstallState -eq $true) {
                 if ($matchFilter -eq $false) {
                     $message  = "Attempting to remove device $FriendlyName"
                     $confirmed = $false
